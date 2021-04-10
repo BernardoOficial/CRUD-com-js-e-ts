@@ -1,0 +1,33 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Calibri, 'Times New Roman', serif;
+}
+
+header nav h1 {
+    font-size: 3rem;
+}
+
+main form {
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    gap: 2rem;
+}
+
+main ul {
+    width: 650px;
+    margin: 2rem auto 2rem auto;
+    padding-left: 0;
+    list-style: none;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    justify-content: center;
+}

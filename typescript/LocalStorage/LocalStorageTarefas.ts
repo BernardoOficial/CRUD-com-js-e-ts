@@ -2,7 +2,7 @@ import { Tarefa } from '../tarefa/tarefa.js'
 
 class LocalStorageTarefas {
 
-    static getItem(item: string | undefined): Tarefa[] {
+    static getTarefas(item: string | undefined): Tarefa[] {
         if(item === undefined) {
             throw new Error('Nome do item no LocalStorage não informado');
         }
@@ -10,8 +10,17 @@ class LocalStorageTarefas {
         return tarefas ? JSON.parse(tarefas) : undefined;
     }
 
-    static setItem(name: string, item: Tarefa[]) {
+    static setTarefas(name: string, item: Tarefa[]) {
         localStorage.setItem(name, JSON.stringify(item));
+    }
+
+    static getLastId(): number {
+        const lastId: string | undefined | null = localStorage.getItem("lastId");
+        return lastId ? JSON.parse(lastId) : undefined;
+    }
+
+    static setLastId(id: number) {
+        localStorage.setItem("lastId", JSON.stringify(id));
     }
 }
 
