@@ -1,6 +1,5 @@
+import { LocalStorageTarefas } from './LocalStorage/LocalStorageTarefas.js';
 import { Tarefa } from './tarefa/tarefa.js'
-
-const bruno = new Tarefa("Fazer lição", "Bruno, você é chato");
 
 class Main {
     static formCreateTarefa = document.querySelector('[data-form-criar-tarefa]') as HTMLFormElement;
@@ -8,6 +7,7 @@ class Main {
     static textareaCreateTarefa = document.querySelector('[data-textarea-criar-tarefa]') as HTMLTextAreaElement;
     static btnCreateTarefa = document.querySelector('[data-btn-criar-tarefa]') as HTMLButtonElement;
     static listaTarefas = document.querySelector('[data-tarefas-criadas]') as HTMLUListElement;
+    static tarefas: Tarefa[] = LocalStorageTarefas.getItem('tarefas');
 
     constructor() {
         this.iniciar();
@@ -16,21 +16,42 @@ class Main {
     iniciar() {
         this.desabilitarButton();
         this.escutarEvento();
+        this.listarTarefas();
     }
 
-    criarTarefa(e: Event) {
+    handleButtonForm() {
         const tarefaTitle = Main.inputCreateTarefa.value;
         const tarefaDescricao = Main.textareaCreateTarefa.value;
         const camposPreenchidos = (Boolean(tarefaTitle.length) && Boolean(tarefaDescricao.length));
         
-        camposPreenchidos ? this.habilitarButton() : this.desabilitarButton();
+        camposPreenchidos ? this.habilitarButton() : this.desabilitarButton();  
+    }
+
+    criarTarefa() {
+        const tarefaTitle = Main.inputCreateTarefa.value;
+        const tarefaDescricao = Main.textareaCreateTarefa.value;
+        const camposPreenchidos = (Boolean(tarefaTitle.length) && Boolean(tarefaDescricao.length));
+
+        const novaTarefa = new Tarefa(tarefaTitle, tarefaDescricao);
+        Main.tarefas.push(novaTarefa);
+        LocalStorageTarefas.setItem('tarefas', Main.tarefas);
+
+        this.listarTarefas();
+    }
+
+    listarTarefas() {
+        const tarefas = LocalStorageTarefas.getItem('tarefas');
+        tarefas.forEach(tarefa => {
+            Main.listaTarefas.innerHTML += `<li>${tarefa.id} - ${tarefa.titulo} || ${tarefa.descricao}</li>`;
+        })
     }
     
     escutarEvento() {
-        Main.formCreateTarefa?.addEventListener("input", (e) => this.criarTarefa(e));
+        Main.formCreateTarefa?.addEventListener("input", (e) => this.handleButtonForm());
     
         Main.formCreateTarefa?.addEventListener("submit", (e) => {
             e.preventDefault();
+            this.criarTarefa();
         });
     }
     

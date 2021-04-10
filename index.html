@@ -11,15 +11,22 @@
 </head>
 <body>
     
-    <h1>CRUD</h1>
+    <header>
+        <nav>
+            <h1>CRUD</h1>
+        </nav>
+    </header>
+    
+    <main>
+        <form data-form-criar-tarefa>
+            <input type="text" data-input-criar-tarefa placeholder="Digite o Título da tarefa">
+            <textarea cols="40" rows="5" data-textarea-criar-tarefa placeholder="Descrição da tarefa"></textarea>
+            <button type="submit" data-btn-criar-tarefa>Criar tarefa</button>
+        </form>
+    
+        <ul data-tarefas-criadas></ul>
+    </main>
 
-    <form data-form-criar-tarefa>
-        <input type="text" data-input-criar-tarefa>
-        <textarea cols="40" rows="5" data-textarea-criar-tarefa></textarea>
-        <button type="submit" data-btn-criar-tarefa>Criar tarefa</button>
-    </form>
-
-    <ul data-tarefas-criadas></ul>
 
     <script type="module" src="./dist/js/main.js"></script>
 </body>
