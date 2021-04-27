@@ -28,44 +28,56 @@ class Main {
         if (tarefas === undefined) {
             return;
         }
-        const parser = new DOMParser();
         Main.listaTarefas.innerHTML = "";
-        tarefas.forEach(tarefa => {
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-primary');
-            button.setAttribute('type', 'button');
-            button.setAttribute('data-bs-toggle', 'modal');
-            button.setAttribute('data-bs-target', '#editar-tarefa');
-            button.setAttribute('data-id', `${tarefa.id}`);
-            button.textContent = 'Editar';
-            button.addEventListener('click', () => console.log('me clicou'));
-            Main.listaTarefas.innerHTML =
-                `
-                    <div class="card">
-                        <div class="card-header bg-dark text-white">
-                            ${tarefa.titulo}
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">${tarefa.descricao}</p>
-                            ${parser.parseFromString(JSON.stringify(button), "text/html")}
-                        </div>
+        tarefas.forEach(tarefa => Main.listaTarefas.innerHTML += this.criarCard(tarefa));
+    }
+    criarCard(tarefa) {
+        return `
+                <div class="card" data-card=${tarefa.id}>
+                    <div class="card-header bg-dark text-white">
+                        ${tarefa.titulo}
                     </div>
-                `;
-            console.log(button);
-            const htmlString = "<strong>Beware of the leopard</strong>";
-            const doc3 = parser.parseFromString(htmlString, "text/html");
-            // HTMLDocument
-            // Main.listaTarefas.appendChild(card);
-            // <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editar-tarefa">Editar</button>
-        });
+                    <div class="card-body">
+                        <p class="card-text">${tarefa.descricao}</p>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editar-tarefa" data-btn-editar=${tarefa.id}>Editar</button>
+                    </div>
+                </div>
+            `;
     }
     escutarEvento() {
-        var _a, _b;
+        var _a, _b, _c, _d;
         (_a = Main.formCreateTarefa) === null || _a === void 0 ? void 0 : _a.addEventListener("input", () => this.handleButtonForm());
-        (_b = Main.formCreateTarefa) === null || _b === void 0 ? void 0 : _b.addEventListener("submit", (e) => {
+        (_b = Main.formCreateTarefa) === null || _b === void 0 ? void 0 : _b.addEventListener("submit", e => {
             e.preventDefault();
             this.criarTarefa();
         });
+        (_c = Main.listaTarefas) === null || _c === void 0 ? void 0 : _c.addEventListener('click', e => {
+            const elementoClicado = e.target;
+            const numCard = Number(elementoClicado.dataset.btnEditar);
+            if (numCard || numCard === 0) {
+                Main.currentlyEditedTask = numCard;
+                this.editarTarefa(Main.currentlyEditedTask);
+            }
+        });
+        (_d = Main.btnUpdateTarefa) === null || _d === void 0 ? void 0 : _d.addEventListener('click', e => {
+            this.salvarEdicao(Main.currentlyEditedTask);
+        });
+    }
+    editarTarefa(id) {
+        const tarefaSelecionada = Main.tarefas[id];
+        console.log(tarefaSelecionada);
+        Main.inputUptadeTarefa.value = tarefaSelecionada.titulo;
+        Main.textareaUptadeTarefa.value = tarefaSelecionada.descricao;
+    }
+    salvarEdicao(id) {
+        const tarefaAlterada = {
+            id,
+            titulo: Main.inputUptadeTarefa.value,
+            descricao: Main.textareaUptadeTarefa.value
+        };
+        Main.tarefas[id] = tarefaAlterada;
+        LocalStorageTarefas.setTarefas('tarefas', Main.tarefas);
+        this.listarTarefas();
     }
     desabilitarButton() {
         Main.btnCreateTarefa.setAttribute('disabled', "");
@@ -74,10 +86,14 @@ class Main {
         Main.btnCreateTarefa.removeAttribute('disabled');
     }
 }
+// Elementos HTML
 Main.formCreateTarefa = document.querySelector('[data-form-criar-tarefa]');
 Main.inputCreateTarefa = document.querySelector('[data-input-criar-tarefa]');
 Main.textareaCreateTarefa = document.querySelector('[data-textarea-criar-tarefa]');
 Main.btnCreateTarefa = document.querySelector('[data-btn-criar-tarefa]');
 Main.listaTarefas = document.querySelector('[data-tarefas-criadas]');
+Main.inputUptadeTarefa = document.querySelector('[data-input-update-tarefa]');
+Main.textareaUptadeTarefa = document.querySelector('[data-textarea-uptade-tarefa]');
+Main.btnUpdateTarefa = document.querySelector('[data-btn-uptade-tarefa]');
 Main.tarefas = LocalStorageTarefas.getTarefas('tarefas') || [];
 new Main();

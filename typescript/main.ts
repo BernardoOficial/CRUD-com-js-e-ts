@@ -2,13 +2,19 @@ import { LocalStorageTarefas } from './LocalStorage/LocalStorageTarefas.js';
 import { Tarefa } from './tarefa/tarefa.js'
 
 class Main {
+
+    // Elementos HTML
     static formCreateTarefa = document.querySelector('[data-form-criar-tarefa]') as HTMLFormElement;
     static inputCreateTarefa = document.querySelector('[data-input-criar-tarefa]') as HTMLInputElement;
     static textareaCreateTarefa = document.querySelector('[data-textarea-criar-tarefa]') as HTMLTextAreaElement;
     static btnCreateTarefa = document.querySelector('[data-btn-criar-tarefa]') as HTMLButtonElement;
     static listaTarefas = document.querySelector('[data-tarefas-criadas]') as HTMLUListElement;
+    static inputUptadeTarefa = document.querySelector('[data-input-update-tarefa]') as HTMLInputElement;
+    static textareaUptadeTarefa = document.querySelector('[data-textarea-uptade-tarefa]') as HTMLTextAreaElement;
+    static btnUpdateTarefa = document.querySelector('[data-btn-uptade-tarefa]') as HTMLButtonElement;
 
     static tarefas: Tarefa[] = LocalStorageTarefas.getTarefas('tarefas') || [];
+    static currentlyEditedTask: number;
     
     constructor() {
         this.iniciar();
@@ -45,51 +51,66 @@ class Main {
             return;
         }
 
-        const parser = new DOMParser();
-
         Main.listaTarefas.innerHTML = "";
-        tarefas.forEach(tarefa => {
+        tarefas.forEach(tarefa => Main.listaTarefas.innerHTML += this.criarCard(tarefa));
+    }
 
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-primary');
-            button.setAttribute('type', 'button');
-            button.setAttribute('data-bs-toggle', 'modal');
-            button.setAttribute('data-bs-target', '#editar-tarefa');
-            button.setAttribute('data-id', `${tarefa.id}`);
-            button.textContent = 'Editar';
-
-            button.addEventListener('click', () => console.log('me clicou'));
-
-            Main.listaTarefas.innerHTML = 
-                `
-                    <div class="card">
-                        <div class="card-header bg-dark text-white">
-                            ${tarefa.titulo}
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">${tarefa.descricao}</p>
-                            ${parser.parseFromString(JSON.stringify(button), "text/html")}
-                        </div>
+    criarCard(tarefa: { id: string | number, titulo: string, descricao: string} ) {
+        return `
+                <div class="card" data-card=${tarefa.id}>
+                    <div class="card-header bg-dark text-white">
+                        ${tarefa.titulo}
                     </div>
-                `
-                
-                console.log(button)
-
-                const htmlString = "<strong>Beware of the leopard</strong>";
-                const doc3 = parser.parseFromString(htmlString, "text/html");
-                // HTMLDocument
-                // Main.listaTarefas.appendChild(card);
-                // <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editar-tarefa">Editar</button>
-            })
+                    <div class="card-body">
+                        <p class="card-text">${tarefa.descricao}</p>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editar-tarefa" data-btn-editar=${tarefa.id}>Editar</button>
+                    </div>
+                </div>
+            `
     }
     
     escutarEvento() {
         Main.formCreateTarefa?.addEventListener("input", () => this.handleButtonForm());
     
-        Main.formCreateTarefa?.addEventListener("submit", (e) => {
+        Main.formCreateTarefa?.addEventListener("submit", e => {
             e.preventDefault();
             this.criarTarefa();
         });
+
+        Main.listaTarefas?.addEventListener('click', e => {
+            const elementoClicado: any = e.target;
+            const numCard = Number(elementoClicado.dataset.btnEditar);
+            if(numCard || numCard === 0) {
+                Main.currentlyEditedTask = numCard;
+                this.editarTarefa(Main.currentlyEditedTask);
+            }
+        });
+
+        Main.btnUpdateTarefa?.addEventListener('click', e => {
+            this.salvarEdicao(Main.currentlyEditedTask);
+        })
+    }
+
+    editarTarefa(id: number) {
+        const tarefaSelecionada = Main.tarefas[id];
+        console.log(tarefaSelecionada);
+        
+        Main.inputUptadeTarefa.value = tarefaSelecionada.titulo;
+        Main.textareaUptadeTarefa.value = tarefaSelecionada.descricao;
+    }
+
+    salvarEdicao(id: number) {
+        const tarefaAlterada: Tarefa = {
+            id,
+            titulo: Main.inputUptadeTarefa.value,
+            descricao: Main.textareaUptadeTarefa.value
+        }
+
+        Main.tarefas[id] = tarefaAlterada;
+
+        LocalStorageTarefas.setTarefas('tarefas', Main.tarefas);
+
+        this.listarTarefas();
     }
     
     desabilitarButton() {
